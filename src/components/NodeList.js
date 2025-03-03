@@ -10,6 +10,7 @@ const NodeList = ({
   onSearchChange,
   onExportJSON,
   onImportJSON,
+  onImportYAML, // Add new prop for YAML import
 }) => {
   // Filter nodes based on search term
   const filteredNodes = Object.entries(nodes)
@@ -36,16 +37,29 @@ const NodeList = ({
           >
             Export
           </button>
-          <label className="button button-outline button-sm cursor-pointer">
-            Import
-            <input
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={onImportJSON}
-            />
-          </label>
         </div>
+      </div>
+
+      {/* Let's add separate import buttons with better UX */}
+      <div className="flex gap-2 mb-4">
+        <label className="button button-outline button-sm cursor-pointer flex-1 text-center">
+          Import JSON
+          <input
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={onImportJSON}
+          />
+        </label>
+        <label className="button button-outline button-sm cursor-pointer flex-1 text-center">
+          Import YAML
+          <input
+            type="file"
+            accept=".yaml,.yml"
+            className="hidden"
+            onChange={onImportYAML}
+          />
+        </label>
       </div>
 
       <div className="search-box">

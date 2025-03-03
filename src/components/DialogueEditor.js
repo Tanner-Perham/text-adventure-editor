@@ -7,6 +7,7 @@ import Preview from "./Preview";
 import ExportPanel from "./ExportPanel";
 import Settings from "./Settings";
 import { exportToYAML, exportToJSON } from "../utils/exporters";
+import { importFromYAML } from "../utils/yamlImporter";
 import HistoryManager from "../utils/historyManager";
 import "./DialogueEditor.css"; // Import the CSS file
 
@@ -286,6 +287,40 @@ const DialogueEditor = () => {
     };
   };
 
+  const handleImportYAML = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileReader = new FileReader();
+    fileReader.readAsText(file, "UTF-8");
+
+    fileReader.onload = (e) => {
+      try {
+        // Use the imported function directly
+        const result = importFromYAML(file);
+
+        result
+          .then((parsedData) => {
+            updateDialogueTrees(parsedData);
+            alert("YAML dialogue tree imported successfully!");
+
+            // Set current node to first node in the tree
+            if (Object.keys(parsedData).length > 0) {
+              setCurrentNode(Object.keys(parsedData)[0]);
+            }
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      } catch (error) {
+        alert("Error importing YAML file: " + error.message);
+      }
+    };
+
+    fileReader.onerror = () => {
+      alert("Failed to read the file");
+    };
+  };
   // Preview handlers
   const startPreview = () => {
     setPreviewConversation([
@@ -398,6 +433,7 @@ const DialogueEditor = () => {
                 onSearchChange={setSearchTerm}
                 onExportJSON={handleExportJSON}
                 onImportJSON={importFromJSON}
+                onImportYAML={handleImportYAML}
               />
             </div>
           </div>

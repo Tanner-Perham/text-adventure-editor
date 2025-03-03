@@ -1,0 +1,92 @@
+# Example Dialogue Tree in YAML format
+# Node structure matches the internal dialogue tree data model
+
+intro_node:
+  id: intro_node
+  text: "Welcome to our game! What would you like to do?"
+  speaker: "Game Master"
+  emotional_state: "Friendly"
+  inner_voice_comments:
+    - voice_type: "Hint"
+      text: "This is the starting point of your adventure."
+      skill_requirement: 0
+  options:
+    - id: option_1
+      text: "I want to explore the forest"
+      next_node: forest_node
+    - id: option_2
+      text: "I want to visit the town"
+      next_node: town_node
+
+forest_node:
+  id: forest_node
+  text: "You enter a dark, mysterious forest. The trees tower above you."
+  speaker: "Narrator"
+  emotional_state: "Neutral"
+  options:
+    - id: forest_option_1
+      text: "Continue deeper into the forest"
+      next_node: deep_forest_node
+    - id: forest_option_2
+      text: "Return to the crossroads"
+      next_node: intro_node
+  inner_voice_comments:
+    - voice_type: "Perception"
+      text: "You notice some strange markings on the trees."
+      skill_requirement: 5
+
+town_node:
+  id: town_node
+  text: "The town is bustling with activity. People are going about their day."
+  speaker: "Narrator"
+  emotional_state: "Happy"
+  options:
+    - id: town_option_1
+      text: "Visit the tavern"
+      next_node: tavern_node
+    - id: town_option_2
+      text: "Visit the market"
+      next_node: market_node
+    - id: town_option_3
+      text: "Leave the town"
+      next_node: intro_node
+
+deep_forest_node:
+  id: deep_forest_node
+  text: "The forest grows darker and more menacing. You hear strange noises."
+  speaker: "Narrator"
+  emotional_state: "Scared"
+  options:
+    - id: deep_forest_option_1
+      text: "Investigate the noises"
+      next_node: forest_encounter_node
+      skill_check:
+        base_difficulty: 12
+        primary_skill: "perception"
+        supporting_skills:
+          - ["courage", 0.5]
+        emotional_modifiers:
+          Scared: -2
+        white_check: true
+        hidden: false
+    - id: deep_forest_option_2
+      text: "Turn back immediately"
+      next_node: forest_node
+
+tavern_node:
+  id: tavern_node
+  text: "The tavern is warm and inviting. The innkeeper nods at you."
+  speaker: "Narrator"
+  emotional_state: "Friendly"
+  options:
+    - id: tavern_option_1
+      text: "Order a drink"
+      next_node: tavern_drink_node
+    - id: tavern_option_2
+      text: "Ask about rumors"
+      next_node: tavern_rumors_node
+    - id: tavern_option_3
+      text: "Leave the tavern"
+      next_node: town_node
+
+# More nodes can be added following the same structure
