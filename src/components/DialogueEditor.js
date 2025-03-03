@@ -4,6 +4,7 @@ import NodeList from "./NodeList";
 import NodeEditor from "./NodeEditor";
 import Visualisation from "./Visualisation";
 import Preview from "./Preview";
+import SaveReminder from "./SaveReminder";
 import ExportPanel from "./ExportPanel";
 import Settings from "./Settings";
 import { exportToYAML, exportToJSON } from "../utils/exporters";
@@ -347,6 +348,31 @@ const DialogueEditor = () => {
     setAvailableItems(newItems);
   };
 
+  // Handle beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      // Cancel the event and show confirmation dialog
+      event.preventDefault();
+      // Chrome requires returnValue to be set
+      event.returnValue = "";
+
+      // Custom message (Note: Most modern browsers no longer display custom messages for security reasons)
+      return "You have unsaved changes. Your work will be lost if you leave the page without exporting. Are you sure you want to leave?";
+    };
+
+    // Check if there are changes (undoStack has items)
+    if (historyStatus.undoCount > 0) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    } else {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [historyStatus.undoCount]); // Dependency on undoCount ensures the listener is added/removed appropriately
+
   return (
     <div className="dialogue-editor-container">
       <div className="dialogue-editor-header">
@@ -574,6 +600,10 @@ const DialogueEditor = () => {
           />
         </div>
       )}
+      <SaveReminder
+        hasUnsavedChanges={historyStatus.undoCount > 0}
+        onExport={handleExportJSON}
+      />
     </div>
   );
 };
