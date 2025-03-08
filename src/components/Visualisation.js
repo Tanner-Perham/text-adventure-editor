@@ -29,11 +29,17 @@ const Visualisation = ({
       emotional_state: node.emotional_state,
     }));
 
+    // Create links with additional properties for success/failure paths
     const links = [];
     Object.entries(dialogueTrees).forEach(([sourceId, node]) => {
       if (node.options) {
         node.options.forEach((option) => {
-          if (option.next_node && dialogueTrees[option.next_node]) {
+          // Handle regular next_node links (when no skill check)
+          if (
+            !option.skill_check &&
+            option.next_node &&
+            dialogueTrees[option.next_node]
+          ) {
             links.push({
               source: sourceId,
               target: option.next_node,
@@ -41,6 +47,38 @@ const Visualisation = ({
                 option.text.length > 20
                   ? option.text.substring(0, 20) + "..."
                   : option.text,
+              isSkillCheck: false,
+              linkType: "normal",
+            });
+          }
+
+          // Handle skill check success links
+          if (
+            option.skill_check &&
+            option.success_node &&
+            dialogueTrees[option.success_node]
+          ) {
+            links.push({
+              source: sourceId,
+              target: option.success_node,
+              label: `${option.text.length > 15 ? option.text.substring(0, 15) + "..." : option.text} (Success)`,
+              isSkillCheck: true,
+              linkType: "success",
+            });
+          }
+
+          // Handle skill check failure links
+          if (
+            option.skill_check &&
+            option.failure_node &&
+            dialogueTrees[option.failure_node]
+          ) {
+            links.push({
+              source: sourceId,
+              target: option.failure_node,
+              label: `${option.text.length > 15 ? option.text.substring(0, 15) + "..." : option.text} (Failure)`,
+              isSkillCheck: true,
+              linkType: "failure",
             });
           }
         });
@@ -82,6 +120,36 @@ const Visualisation = ({
       .append("path")
       .attr("d", "M0,-5L10,0L0,5")
       .attr("fill", "#999");
+
+    // Define arrowhead marker for success links
+    svg
+      .append("defs")
+      .append("marker")
+      .attr("id", "arrowhead-success")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 20)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "#10b981");
+
+    // Define arrowhead marker for failure links
+    svg
+      .append("defs")
+      .append("marker")
+      .attr("id", "arrowhead-failure")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 20)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "#ef4444");
 
     // Color scale for emotional states
     const colorScale = d3
@@ -140,11 +208,23 @@ const Visualisation = ({
         .enter()
         .append("g");
 
+      // Add link lines with different styles based on link properties
       link
         .append("line")
-        .attr("stroke", "#999")
-        .attr("stroke-width", 2)
-        .attr("marker-end", "url(#arrowhead)");
+        .attr("stroke", (d) => {
+          if (d.linkType === "success") return "#10b981"; // Success links in green
+          if (d.linkType === "failure") return "#ef4444"; // Failure links in red
+          return "#999"; // Normal links in gray
+        })
+        .attr("stroke-width", (d) => (d.isSkillCheck ? 2 : 1))
+        .attr("stroke-dasharray", (d) =>
+          d.linkType === "failure" ? "5,5" : null,
+        )
+        .attr("marker-end", (d) => {
+          if (d.linkType === "success") return "url(#arrowhead-success)";
+          if (d.linkType === "failure") return "url(#arrowhead-failure)";
+          return "url(#arrowhead)";
+        });
 
       // Add link labels (for dialogue options)
       link
@@ -152,7 +232,11 @@ const Visualisation = ({
         .attr("dy", -5)
         .attr("text-anchor", "middle")
         .attr("font-size", "8px")
-        .attr("fill", "#666")
+        .attr("fill", (d) => {
+          if (d.linkType === "success") return "#10b981";
+          if (d.linkType === "failure") return "#ef4444";
+          return "#666";
+        })
         .text((d) => d.label);
 
       // Add node groups
@@ -259,8 +343,6 @@ const Visualisation = ({
       // Draw links
       g.append("g")
         .attr("fill", "none")
-        .attr("stroke", "#999")
-        .attr("stroke-width", 2)
         .selectAll("path")
         .data(root.links())
         .join("path")
@@ -271,7 +353,25 @@ const Visualisation = ({
             .x((d) => d.y) // Flip x and y for horizontal layout
             .y((d) => d.x),
         )
-        .attr("marker-end", "url(#arrowhead)");
+        .attr("stroke", (d) => {
+          // Color links based on path type
+          if (d.target.data.pathType === "success") return "#10b981";
+          if (d.target.data.pathType === "failure") return "#ef4444";
+          return "#999";
+        })
+        .attr("stroke-width", (d) =>
+          d.target.data.pathType === "normal" ? 1 : 2,
+        )
+        .attr("stroke-dasharray", (d) =>
+          d.target.data.pathType === "failure" ? "5,5" : null,
+        )
+        .attr("marker-end", (d) => {
+          if (d.target.data.pathType === "success")
+            return "url(#arrowhead-success)";
+          if (d.target.data.pathType === "failure")
+            return "url(#arrowhead-failure)";
+          return "url(#arrowhead)";
+        });
 
       // Add link labels
       const linkLabels = g
@@ -280,25 +380,20 @@ const Visualisation = ({
         .data(root.links())
         .join("text")
         .attr("font-size", "8px")
-        .attr("fill", "#666")
-        .attr("dy", -5);
-
-      // Find the corresponding original link for each hierarchical link
-      linkLabels.each(function (d) {
-        const sourceId = d.source.data.id;
-        const targetId = d.target.data.id;
-        const originalLink = links.find(
-          (link) => link.source === sourceId && link.target === targetId,
-        );
-
-        if (originalLink) {
-          d3.select(this)
-            .attr("x", (d.source.y + d.target.y) / 2)
-            .attr("y", (d.source.x + d.target.x) / 2)
-            .attr("text-anchor", "middle")
-            .text(originalLink.label);
-        }
-      });
+        .attr("fill", (d) => {
+          if (d.target.data.pathType === "success") return "#10b981";
+          if (d.target.data.pathType === "failure") return "#ef4444";
+          return "#666";
+        })
+        .attr("x", (d) => (d.source.y + d.target.y) / 2)
+        .attr("y", (d) => (d.source.x + d.target.x) / 2 - 5)
+        .attr("text-anchor", "middle")
+        .text((d) => {
+          if (d.target.data.pathType === "success") return "Success";
+          if (d.target.data.pathType === "failure") return "Failure";
+          if (d.target.data.optionText) return d.target.data.optionText;
+          return "";
+        });
 
       // Draw nodes
       const node = g
@@ -376,9 +471,11 @@ const Visualisation = ({
           .attr("stroke-dasharray", "5,5");
 
         // Add nodes along the path
-        path.forEach((nodeId, nodeIndex) => {
-          const nodeData = nodes.find((n) => n.id === nodeId);
-          if (!nodeData) return;
+        path.forEach((nodeData, nodeIndex) => {
+          const nodeId = nodeData.id;
+          const linkType = nodeData.linkType;
+          const nodeInfo = nodes.find((n) => n.id === nodeId);
+          if (!nodeInfo) return;
 
           const nodeGroup = pathGroup
             .append("g")
@@ -389,7 +486,7 @@ const Visualisation = ({
           nodeGroup
             .append("circle")
             .attr("r", nodeRadius)
-            .attr("fill", colorScale(nodeData.emotional_state))
+            .attr("fill", colorScale(nodeInfo.emotional_state))
             .attr("stroke", nodeId === currentNode ? "#ff0000" : "#fff")
             .attr("stroke-width", nodeId === currentNode ? 3 : 1);
 
@@ -409,7 +506,7 @@ const Visualisation = ({
               .attr("dy", -30)
               .attr("text-anchor", "middle")
               .attr("font-weight", "bold")
-              .text(nodeData.speaker);
+              .text(nodeInfo.speaker);
 
             // Add dialogue text below
             nodeGroup
@@ -417,17 +514,14 @@ const Visualisation = ({
               .attr("dy", 35)
               .attr("text-anchor", "middle")
               .attr("font-size", "8px")
-              .text(nodeData.text);
+              .text(nodeInfo.text);
           }
 
           // Connect to next node with arrow if not the last one
           if (nodeIndex < path.length - 1) {
-            const nextNodeId = path[nodeIndex + 1];
-
-            // Find the original link to get the label text
-            const linkData = links.find(
-              (l) => l.source === nodeId && l.target === nextNodeId,
-            );
+            const nextNodeData = path[nodeIndex + 1];
+            const nextNodeId = nextNodeData.id;
+            const nextLinkType = nextNodeData.linkType || "normal";
 
             // Draw connector line with arrow
             pathGroup
@@ -436,21 +530,41 @@ const Visualisation = ({
               .attr("y1", 0)
               .attr("x2", 50 + (nodeIndex + 1) * nodeSpacing - nodeRadius)
               .attr("y2", 0)
-              .attr("stroke", "#999")
-              .attr("stroke-width", 2)
-              .attr("marker-end", "url(#arrowhead)");
+              .attr("stroke", () => {
+                if (nextLinkType === "success") return "#10b981";
+                if (nextLinkType === "failure") return "#ef4444";
+                return "#999";
+              })
+              .attr("stroke-width", nextLinkType === "normal" ? 1 : 2)
+              .attr(
+                "stroke-dasharray",
+                nextLinkType === "failure" ? "5,5" : null,
+              )
+              .attr("marker-end", () => {
+                if (nextLinkType === "success")
+                  return "url(#arrowhead-success)";
+                if (nextLinkType === "failure")
+                  return "url(#arrowhead-failure)";
+                return "url(#arrowhead)";
+              });
 
-            // Add option text as link label
-            if (linkData) {
-              pathGroup
-                .append("text")
-                .attr("x", 50 + nodeIndex * nodeSpacing + nodeSpacing / 2)
-                .attr("y", -10)
-                .attr("text-anchor", "middle")
-                .attr("font-size", "8px")
-                .attr("fill", "#666")
-                .text(linkData.label);
-            }
+            // Add path type label
+            pathGroup
+              .append("text")
+              .attr("x", 50 + nodeIndex * nodeSpacing + nodeSpacing / 2)
+              .attr("y", -10)
+              .attr("text-anchor", "middle")
+              .attr("font-size", "8px")
+              .attr("fill", () => {
+                if (nextLinkType === "success") return "#10b981";
+                if (nextLinkType === "failure") return "#ef4444";
+                return "#666";
+              })
+              .text(() => {
+                if (nextLinkType === "success") return "Success";
+                if (nextLinkType === "failure") return "Failure";
+                return nextNodeData.optionText || "";
+              });
           }
         });
       });
@@ -466,20 +580,34 @@ const Visualisation = ({
       const rootNode = rootNodes.length > 0 ? rootNodes[0] : nodes[0];
 
       // Build the tree recursively
-      function buildTree(nodeId, visited = new Set()) {
+      function buildTree(
+        nodeId,
+        visited = new Set(),
+        pathType = "normal",
+        optionText = null,
+      ) {
         if (visited.has(nodeId)) {
           // Avoid cycles
-          return { id: nodeId, name: nodeId + " (cycle)", children: [] };
+          return {
+            id: nodeId,
+            name: nodeId + " (cycle)",
+            children: [],
+            pathType,
+            optionText,
+          };
         }
 
-        visited.add(nodeId);
+        const newVisited = new Set(visited);
+        newVisited.add(nodeId);
 
         const node = nodes.find((n) => n.id === nodeId);
         if (!node) return null;
 
         const outgoingLinks = links.filter((link) => link.source === nodeId);
         const children = outgoingLinks
-          .map((link) => buildTree(link.target, new Set(visited)))
+          .map((link) =>
+            buildTree(link.target, newVisited, link.linkType, link.label),
+          )
           .filter(Boolean);
 
         return {
@@ -489,6 +617,8 @@ const Visualisation = ({
           text: node.text,
           emotional_state: node.emotional_state,
           children: children,
+          pathType,
+          optionText,
         };
       }
 
@@ -517,14 +647,26 @@ const Visualisation = ({
       startNodeIds.forEach((startId) => {
         const paths = [];
 
-        function traversePath(nodeId, currentPath = [], visited = new Set()) {
+        function traversePath(
+          nodeId,
+          currentPath = [],
+          visited = new Set(),
+          linkType = null,
+          optionText = null,
+        ) {
           // Avoid infinite loops by detecting cycles
           if (visited.has(nodeId)) {
-            paths.push([...currentPath, nodeId + "*"]); // Mark as cyclic
+            paths.push([
+              ...currentPath,
+              { id: nodeId + "*", linkType, optionText },
+            ]); // Mark as cyclic
             return;
           }
 
-          const newPath = [...currentPath, nodeId];
+          const newPath = [
+            ...currentPath,
+            { id: nodeId, linkType, optionText },
+          ];
           const newVisited = new Set(visited).add(nodeId);
 
           // Find outgoing links
@@ -538,7 +680,13 @@ const Visualisation = ({
 
           // Continue path for each option
           outgoingLinks.forEach((link) => {
-            traversePath(link.target, newPath, newVisited);
+            traversePath(
+              link.target,
+              newPath,
+              newVisited,
+              link.linkType,
+              link.label,
+            );
           });
         }
 
@@ -595,6 +743,22 @@ const Visualisation = ({
           width="100%"
           height="100%"
         ></svg>
+      </div>
+
+      {/* Legend for link types */}
+      <div className="p-2 border-t border-gray-200 flex items-center gap-4 text-sm">
+        <div className="flex items-center">
+          <div className="w-4 h-1 bg-gray-500 mr-1"></div>
+          <span>Normal Path</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-4 h-1 bg-green-500 mr-1"></div>
+          <span>Success Path</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-4 h-1 bg-red-500 mr-1 border-dashed border-2"></div>
+          <span>Failure Path</span>
+        </div>
       </div>
     </div>
   );

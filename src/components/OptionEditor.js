@@ -21,6 +21,9 @@ const OptionEditor = ({
         white_check: true,
         hidden: false,
       },
+      // When adding a skill check, also initialize success and failure nodes
+      success_node: "",
+      failure_node: "",
     });
   };
 
@@ -36,7 +39,12 @@ const OptionEditor = ({
 
   // Handler for removing a skill check
   const removeSkillCheck = (optionIndex) => {
-    onUpdate(optionIndex, { skill_check: null });
+    // When removing a skill check, also remove success and failure nodes
+    onUpdate(optionIndex, {
+      skill_check: null,
+      success_node: null,
+      failure_node: null,
+    });
   };
 
   // Handler for adding emotional impact
@@ -78,7 +86,7 @@ const OptionEditor = ({
 
   if (options.length === 0) {
     return (
-      <div className="text-gray-400 italic text-sm p-3 border rounded">
+      <div className="text-light italic text-sm p-3 border rounded">
         No dialogue options. Add some to give the player choices.
       </div>
     );
@@ -87,68 +95,115 @@ const OptionEditor = ({
   return (
     <div className="space-y-4">
       {options.map((option, idx) => (
-        <div key={idx} className="border p-3 rounded bg-gray-50">
-          <div className="flex justify-between mb-2">
+        <div key={idx} className="option-item">
+          <div className="option-header">
             <h4 className="font-medium">Option #{idx + 1}</h4>
             <button
               onClick={() => onDelete(idx)}
-              className="text-red-500 hover:text-red-700"
+              className="button button-sm button-danger"
             >
               Remove
             </button>
           </div>
 
-          <div className="mb-2">
-            <label className="block text-sm font-medium mb-1">
-              Option Text
-            </label>
+          <div className="input-group">
+            <label className="input-label">Option Text</label>
             <textarea
-              className="w-full p-2 border rounded"
+              className="input-field textarea-field"
               value={option.text}
               onChange={(e) => onUpdate(idx, { text: e.target.value })}
+              placeholder="What the player can say"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            <div>
-              <label className="block text-sm font-medium mb-1">ID</label>
+          <div className="option-grid">
+            <div className="input-group">
+              <label className="input-label">Option ID</label>
               <input
                 type="text"
-                className="w-full p-2 border rounded"
+                className="input-field"
                 value={option.id}
                 onChange={(e) => onUpdate(idx, { id: e.target.value })}
+                placeholder="unique_option_id"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Next Node
-              </label>
-              <select
-                className="w-full p-2 border rounded"
-                value={option.next_node || ""}
-                onChange={(e) => onUpdate(idx, { next_node: e.target.value })}
-              >
-                <option value="">-- None --</option>
-                {Object.keys(allNodes).map((nodeId) => (
-                  <option key={nodeId} value={nodeId}>
-                    {nodeId}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Only show next_node if there's no skill check */}
+            {!option.skill_check && (
+              <div className="input-group">
+                <label className="input-label">Next Node</label>
+                <select
+                  className="select-field"
+                  value={option.next_node || ""}
+                  onChange={(e) => onUpdate(idx, { next_node: e.target.value })}
+                >
+                  <option value="">-- None --</option>
+                  {Object.keys(allNodes).map((nodeId) => (
+                    <option key={nodeId} value={nodeId}>
+                      {nodeId}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Skill Check */}
           <div className="mb-2">
             {option.skill_check ? (
-              <SkillCheckEditor
-                skillCheck={option.skill_check}
-                availableSkills={availableSkills}
-                emotionalStates={emotionalStates}
-                onUpdate={(updates) => updateSkillCheck(idx, updates)}
-                onRemove={() => removeSkillCheck(idx)}
-              />
+              <div>
+                <SkillCheckEditor
+                  skillCheck={option.skill_check}
+                  availableSkills={availableSkills}
+                  emotionalStates={emotionalStates}
+                  onUpdate={(updates) => updateSkillCheck(idx, updates)}
+                  onRemove={() => removeSkillCheck(idx)}
+                />
+
+                {/* Success Node Selector - only visible when skill check exists */}
+                <div className="input-group mt-2">
+                  <label className="input-label">Success Node</label>
+                  <select
+                    className="select-field"
+                    value={option.success_node || ""}
+                    onChange={(e) =>
+                      onUpdate(idx, { success_node: e.target.value })
+                    }
+                  >
+                    <option value="">-- None --</option>
+                    {Object.keys(allNodes).map((nodeId) => (
+                      <option key={nodeId} value={nodeId}>
+                        {nodeId}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-light mt-1">
+                    Node to navigate to when skill check succeeds
+                  </p>
+                </div>
+
+                {/* Failure Node Selector - only visible when skill check exists */}
+                <div className="input-group mt-2">
+                  <label className="input-label">Failure Node</label>
+                  <select
+                    className="select-field"
+                    value={option.failure_node || ""}
+                    onChange={(e) =>
+                      onUpdate(idx, { failure_node: e.target.value })
+                    }
+                  >
+                    <option value="">-- None --</option>
+                    {Object.keys(allNodes).map((nodeId) => (
+                      <option key={nodeId} value={nodeId}>
+                        {nodeId}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-light mt-1">
+                    Node to navigate to when skill check fails
+                  </p>
+                </div>
+              </div>
             ) : (
               <button
                 onClick={() => addSkillCheck(idx)}
@@ -162,12 +217,12 @@ const OptionEditor = ({
           {/* Emotional Impact */}
           <div className="mb-2">
             {option.emotional_impact ? (
-              <div className="border p-2 rounded bg-green-50">
+              <div className="emotional-impact-card">
                 <div className="flex justify-between items-center mb-2">
                   <h5 className="font-medium text-sm">Emotional Impact</h5>
                   <button
                     onClick={() => removeEmotionalImpact(idx)}
-                    className="text-red-500 text-sm hover:text-red-700"
+                    className="button button-sm button-danger"
                   >
                     Remove
                   </button>
@@ -178,7 +233,7 @@ const OptionEditor = ({
                       <label className="text-xs w-1/2">{state}:</label>
                       <input
                         type="number"
-                        className="w-1/2 p-1 border rounded text-sm"
+                        className="input-field text-sm p-1"
                         value={option.emotional_impact[state] || 0}
                         onChange={(e) =>
                           updateEmotionalImpact(idx, state, e.target.value)
@@ -201,12 +256,12 @@ const OptionEditor = ({
           {/* Conditions */}
           <div className="mb-2">
             {option.conditions ? (
-              <div className="border p-2 rounded bg-purple-50">
+              <div className="conditions-card">
                 <div className="flex justify-between items-center mb-2">
                   <h5 className="font-medium text-sm">Conditions</h5>
                   <button
                     onClick={() => removeConditions(idx)}
-                    className="text-red-500 text-sm hover:text-red-700"
+                    className="button button-sm button-danger"
                   >
                     Remove
                   </button>
@@ -214,12 +269,10 @@ const OptionEditor = ({
 
                 {/* Required Items */}
                 <div className="mb-2">
-                  <label className="block text-xs font-medium">
-                    Required Items
-                  </label>
+                  <label className="input-label text-xs">Required Items</label>
                   <select
                     multiple
-                    className="w-full p-1 border rounded text-sm h-20"
+                    className="input-field text-sm h-20"
                     value={option.conditions.required_items || []}
                     onChange={(e) => {
                       const selectedItems = Array.from(
@@ -244,16 +297,14 @@ const OptionEditor = ({
 
                 {/* Required Skills */}
                 <div>
-                  <label className="block text-xs font-medium">
-                    Required Skills
-                  </label>
+                  <label className="input-label text-xs">Required Skills</label>
                   <div className="grid grid-cols-2 gap-2">
                     {availableSkills.map((skill) => (
                       <div key={skill} className="flex items-center">
                         <label className="text-xs w-1/2">{skill}:</label>
                         <input
                           type="number"
-                          className="w-1/2 p-1 border rounded text-sm"
+                          className="input-field text-sm p-1"
                           value={
                             option.conditions.required_skills?.[skill] || 0
                           }
@@ -288,25 +339,27 @@ const OptionEditor = ({
           {/* Script Effects */}
           <div className="mb-2">
             {option.script_effects ? (
-              <div className="border p-2 rounded bg-yellow-50">
-                <div className="flex justify-between items-center mb-2">
-                  <h5 className="font-medium text-sm">Script Effects</h5>
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="card-title">Script Effects</h5>
                   <button
                     onClick={() => onUpdate(idx, { script_effects: null })}
-                    className="text-red-500 text-sm hover:text-red-700"
+                    className="button button-sm button-danger"
                   >
                     Remove
                   </button>
                 </div>
-                <textarea
-                  className="w-full p-1 border rounded text-sm font-mono"
-                  value={option.script_effects}
-                  rows={3}
-                  placeholder="Enter script commands..."
-                  onChange={(e) =>
-                    onUpdate(idx, { script_effects: e.target.value })
-                  }
-                />
+                <div className="card-body">
+                  <textarea
+                    className="input-field font-mono"
+                    value={option.script_effects}
+                    rows={3}
+                    placeholder="Enter script commands..."
+                    onChange={(e) =>
+                      onUpdate(idx, { script_effects: e.target.value })
+                    }
+                  />
+                </div>
               </div>
             ) : (
               <button
@@ -321,34 +374,36 @@ const OptionEditor = ({
           {/* Item Rewards */}
           <div className="mb-2">
             {option.item_rewards ? (
-              <div className="border p-2 rounded bg-indigo-50">
-                <div className="flex justify-between items-center mb-2">
-                  <h5 className="font-medium text-sm">Item Rewards</h5>
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="card-title">Item Rewards</h5>
                   <button
                     onClick={() => onUpdate(idx, { item_rewards: null })}
-                    className="text-red-500 text-sm hover:text-red-700"
+                    className="button button-sm button-danger"
                   >
                     Remove
                   </button>
                 </div>
-                <select
-                  multiple
-                  className="w-full p-1 border rounded text-sm h-20"
-                  value={option.item_rewards || []}
-                  onChange={(e) => {
-                    const selectedRewards = Array.from(
-                      e.target.selectedOptions,
-                      (option) => option.value,
-                    );
-                    onUpdate(idx, { item_rewards: selectedRewards });
-                  }}
-                >
-                  {availableItems.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
+                <div className="card-body">
+                  <select
+                    multiple
+                    className="input-field h-20"
+                    value={option.item_rewards || []}
+                    onChange={(e) => {
+                      const selectedRewards = Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value,
+                      );
+                      onUpdate(idx, { item_rewards: selectedRewards });
+                    }}
+                  >
+                    {availableItems.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             ) : (
               <button
@@ -361,7 +416,7 @@ const OptionEditor = ({
           </div>
 
           {/* Special Flags */}
-          <div className="mb-2">
+          <div>
             <div className="flex flex-wrap gap-2 mt-2">
               <label className="flex items-center">
                 <input

@@ -62,6 +62,27 @@ const validateDialogueTree = (nodes) => {
             error: `Option #${i + 1} in node "${nodeId}" is missing a text property`,
           };
         }
+
+        // Check if option has a skill check but no success_node or failure_node
+        if (
+          option.skill_check &&
+          !(option.success_node || option.failure_node)
+        ) {
+          // This is just a warning, not an error that stops import
+          console.warn(
+            `Warning: Option #${i + 1} in node "${nodeId}" has a skill check but no success_node or failure_node defined.`,
+          );
+        }
+
+        // Check if success_node or failure_node is defined but skill_check is not
+        if (
+          (option.success_node || option.failure_node) &&
+          !option.skill_check
+        ) {
+          console.warn(
+            `Warning: Option #${i + 1} in node "${nodeId}" has success_node or failure_node defined but no skill_check.`,
+          );
+        }
       }
     }
 
@@ -90,8 +111,14 @@ const parseYAML = (yamlContent) => {
     // Parse YAML content to JavaScript object
     const parsed = yaml.load(yamlContent);
 
+    // Check if dialogue_trees key exists
+    let dialogueTrees = parsed;
+    if (parsed.dialogue_trees) {
+      dialogueTrees = parsed.dialogue_trees;
+    }
+
     // Validate the parsed data
-    const validation = validateDialogueTree(parsed);
+    const validation = validateDialogueTree(dialogueTrees);
 
     if (!validation.valid) {
       return {
@@ -102,7 +129,7 @@ const parseYAML = (yamlContent) => {
 
     return {
       success: true,
-      data: parsed,
+      data: dialogueTrees,
     };
   } catch (error) {
     return {

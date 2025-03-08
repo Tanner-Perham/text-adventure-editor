@@ -27,7 +27,9 @@ export const exportToYAML = (dialogueTrees) => {
       node.options.forEach((option) => {
         yaml += `      - id: "${option.id}"\n`;
         yaml += `        text: "${option.text?.replace(/"/g, '\\"')}"\n`;
-        if (option.next_node) {
+
+        // Only include next_node if there's no skill check
+        if (option.next_node && !option.skill_check) {
           yaml += `        next_node: "${option.next_node}"\n`;
         }
 
@@ -57,6 +59,15 @@ export const exportToYAML = (dialogueTrees) => {
 
           yaml += `          white_check: ${option.skill_check.white_check}\n`;
           yaml += `          hidden: ${option.skill_check.hidden}\n`;
+
+          // Add success_node and failure_node if they exist with skill check
+          if (option.success_node) {
+            yaml += `        success_node: "${option.success_node}"\n`;
+          }
+
+          if (option.failure_node) {
+            yaml += `        failure_node: "${option.failure_node}"\n`;
+          }
         }
 
         if (option.emotional_impact) {
