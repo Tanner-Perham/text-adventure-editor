@@ -1,14 +1,14 @@
 import React, { useState } from "react";
+import { useQuest } from "../context/QuestContext";
+import ObjectiveCompletionEvents from "./ObjectiveCompletionEvents";
 
-const QuestObjectiveEditor = ({
-  objective,
-  index,
-  onUpdate,
-  onDelete,
-  availableItems,
-  availableLocations,
-  npcs,
-}) => {
+/**
+ * Component for a single objective item in a quest stage
+ */
+const QuestObjectiveItem = ({ objective, index, onUpdate, onDelete }) => {
+  const { availableItems, availableLocations, getAllNPCs } = useQuest();
+
+  // State for showing/hiding the completion events
   const [showEvents, setShowEvents] = useState(false);
 
   // Handle basic property changes
@@ -31,72 +31,8 @@ const QuestObjectiveEditor = ({
     onUpdate({ required_items: selectedItems });
   };
 
-  // Handle adding a completion event
-  const handleAddCompletionEvent = (eventType) => {
-    let newEvent;
-
-    switch (eventType) {
-      case "AddClue":
-        newEvent = {
-          event_type: "AddClue",
-          data: {
-            id: `clue_${Date.now()}`,
-            description: "New clue",
-            related_quest: "",
-            discovered: false,
-          },
-        };
-        break;
-      case "AddItem":
-        newEvent = {
-          event_type: "AddItem",
-          data: {
-            id: "",
-            name: "",
-            description: "",
-            effects: {},
-          },
-        };
-        break;
-      case "ModifySkill":
-        newEvent = {
-          event_type: "ModifySkill",
-          data: ["", 0],
-        };
-        break;
-      case "ModifyRelationship":
-        newEvent = {
-          event_type: "ModifyRelationship",
-          data: ["", 0],
-        };
-        break;
-      default:
-        newEvent = {
-          event_type: eventType,
-          data: "",
-        };
-    }
-
-    onUpdate({
-      completion_events: [...(objective.completion_events || []), newEvent],
-    });
-  };
-
-  // Handle updating a completion event
-  const handleUpdateCompletionEvent = (index, updatedEvent) => {
-    const newEvents = [...(objective.completion_events || [])];
-    newEvents[index] = updatedEvent;
-
-    onUpdate({ completion_events: newEvents });
-  };
-
-  // Handle deleting a completion event
-  const handleDeleteCompletionEvent = (index) => {
-    const newEvents = [...(objective.completion_events || [])];
-    newEvents.splice(index, 1);
-
-    onUpdate({ completion_events: newEvents });
-  };
+  // Get all NPCs for dropdown
+  const npcs = getAllNPCs();
 
   return (
     <div className="objective-card">
@@ -263,73 +199,15 @@ const QuestObjectiveEditor = ({
               {showEvents ? "Hide Events" : "Show Events"} (
               {(objective.completion_events || []).length})
             </button>
-
-            {showEvents && (
-              <div className="dropdown">
-                <button className="button button-sm button-primary dropdown-toggle">
-                  + Add Event
-                </button>
-                <div className="dropdown-menu">
-                  <button
-                    onClick={() => handleAddCompletionEvent("AddClue")}
-                    className="dropdown-item"
-                  >
-                    Add Clue
-                  </button>
-                  <button
-                    onClick={() => handleAddCompletionEvent("AddItem")}
-                    className="dropdown-item"
-                  >
-                    Add Item
-                  </button>
-                  <button
-                    onClick={() => handleAddCompletionEvent("ModifySkill")}
-                    className="dropdown-item"
-                  >
-                    Modify Skill
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleAddCompletionEvent("ModifyRelationship")
-                    }
-                    className="dropdown-item"
-                  >
-                    Modify Relationship
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {showEvents && (
-            <div className="completion-events-list">
-              {objective.completion_events &&
-              objective.completion_events.length > 0 ? (
-                objective.completion_events.map((event, eventIndex) => (
-                  <div key={eventIndex} className="objective-event-card">
-                    <div className="objective-event-header">
-                      <h6>{event.event_type}</h6>
-                      <button
-                        onClick={() => handleDeleteCompletionEvent(eventIndex)}
-                        className="button button-xs button-danger"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                    <div className="objective-event-details">
-                      <pre className="text-xs bg-light p-2 rounded overflow-auto">
-                        {JSON.stringify(event.data, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-light italic">
-                  No completion events. These trigger when this objective is
-                  completed.
-                </p>
-              )}
-            </div>
+            <ObjectiveCompletionEvents
+              events={objective.completion_events || []}
+              onUpdate={(newEvents) =>
+                handlePropertyChange("completion_events", newEvents)
+              }
+            />
           )}
         </div>
       </div>
@@ -337,4 +215,4 @@ const QuestObjectiveEditor = ({
   );
 };
 
-export default QuestObjectiveEditor;
+export default QuestObjectiveItem;

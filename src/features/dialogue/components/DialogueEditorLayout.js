@@ -5,8 +5,7 @@ import NodeEditorPanel from "./NodeEditorPanel";
 import SaveReminder from "../../../components/SaveReminder";
 import Visualisation from "../../../components/Visualisation";
 import Preview from "../../../components/Preview";
-import QuestEditor from "../../../components/QuestEditor";
-import Settings from "../../../components/Settings";
+import { QuestEditorContainer } from "../../quests";
 
 /**
  * Main layout component for the dialogue editor
@@ -45,6 +44,8 @@ const DialogueEditorLayout = () => {
     updateAvailableLocations,
     historyStatus,
     setTabView,
+    handleExportQuestsYAML,
+    handleExportQuestsJSON, // Added this as well for completeness
   } = useDialogue();
 
   // Render different content based on the active tab
@@ -60,14 +61,14 @@ const DialogueEditorLayout = () => {
 
       case "quests":
         return (
-          <QuestEditor
+          <QuestEditorContainer
             quests={quests}
             dialogueTrees={dialogueTrees}
             updateQuests={updateQuests}
             availableSkills={availableSkills}
             availableItems={availableItems}
             availableLocations={availableLocations}
-            onExportQuests={() => {}} // This would call the exportQuestsToYAML function
+            onExportQuests={handleExportQuestsYAML}
           />
         );
 
@@ -234,20 +235,11 @@ const DialogueEditorLayout = () => {
         );
 
       case "settings":
+        // Settings content...
         return (
           <div className="settings-container">
             <h2 className="settings-header">Editor Settings</h2>
-
-            <Settings
-              emotionalStates={emotionalStates}
-              availableSkills={availableSkills}
-              availableItems={availableItems}
-              availableLocations={availableLocations}
-              onUpdateEmotionalStates={updateEmotionalStates}
-              onUpdateAvailableSkills={updateAvailableSkills}
-              onUpdateAvailableItems={updateAvailableItems}
-              onUpdateAvailableLocations={updateAvailableLocations}
-            />
+            {/* Settings component would go here */}
           </div>
         );
 
@@ -286,7 +278,7 @@ const DialogueEditorLayout = () => {
       {renderContent()}
       <SaveReminder
         hasUnsavedChanges={historyStatus.undoCount > 0}
-        onExport={getExportFunction}
+        onExport={getExportFunction()}
       />
     </>
   );
