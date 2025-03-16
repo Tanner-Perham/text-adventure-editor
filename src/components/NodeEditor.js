@@ -9,6 +9,7 @@ const NodeEditor = ({
   availableSkills,
   availableItems,
   allNodes,
+  quests, // Add quests prop
   onUpdate,
   onRenameNodeId,
 }) => {
@@ -261,6 +262,7 @@ const NodeEditor = ({
             availableSkills={availableSkills}
             availableItems={availableItems}
             emotionalStates={emotionalStates}
+            quests={quests} // Pass quests to OptionEditor
             onUpdate={updateOption}
             onDelete={deleteOption}
           />

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SkillCheckEditor from "./SkillCheckEditor";
+import ConsequenceEditor from "./ConsequenceEditor";
 
 const OptionEditor = ({
   options,
@@ -7,9 +8,101 @@ const OptionEditor = ({
   availableSkills,
   availableItems,
   emotionalStates,
+  quests, // Add quests parameter
   onUpdate,
   onDelete,
 }) => {
+  // State for dropdown menus
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  // Keep track of quest-related options
+  const [questRelatedOptions, setQuestRelatedOptions] = useState({});
+
+  // Dropdown reference for click outside handling
+  const dropdownRef = useRef(null);
+
+  // Detect quest-related options
+  useEffect(() => {
+    if (!options || !quests) return;
+
+    const relatedOptions = {};
+    options.forEach((option, index) => {
+      if (option.consequences) {
+        const questIds = new Set();
+
+        option.consequences.forEach((effect) => {
+          const questId = getQuestIdFromEffect(effect);
+          if (questId) {
+            questIds.add(questId);
+          }
+        });
+
+        if (questIds.size > 0) {
+          relatedOptions[index] = Array.from(questIds);
+        }
+      }
+    });
+
+    setQuestRelatedOptions(relatedOptions);
+  }, [options, quests]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Toggle dropdown menu
+  const toggleDropdown = (index) => {
+    setActiveDropdown(activeDropdown === index ? null : index);
+  };
+
+  // Helper function to extract quest ID from a dialogue effect
+  const getQuestIdFromEffect = (effect) => {
+    if (!effect || !effect.event_type) return null;
+
+    switch (effect.event_type) {
+      case "StartQuest":
+        return typeof effect.data === "string" ? effect.data : null;
+      case "AdvanceQuest":
+      case "CompleteQuestObjective":
+      case "UnlockQuestBranch":
+        return Array.isArray(effect.data) && effect.data.length > 0
+          ? effect.data[0]
+          : null;
+      case "FailQuest":
+        return typeof effect.data === "string" ? effect.data : null;
+      case "AddQuestItem":
+        return effect.data?.quest_id || null;
+      case "RevealClue":
+        return effect.data?.related_quest || null;
+      default:
+        return null;
+    }
+  };
+
+  // Check if option is related to any quest
+  const isQuestRelatedOption = (index) => {
+    return questRelatedOptions[index] && questRelatedOptions[index].length > 0;
+  };
+
+  // Get quest titles for tooltips
+  const getQuestTitles = (index) => {
+    if (!questRelatedOptions[index]) return "";
+
+    return questRelatedOptions[index]
+      .map((questId) => quests[questId]?.title || questId)
+      .join(", ");
+  };
+
   // Handler for adding a skill check to an option
   const addSkillCheck = (optionIndex) => {
     onUpdate(optionIndex, {
@@ -84,6 +177,213 @@ const OptionEditor = ({
     onUpdate(optionIndex, { conditions: null });
   };
 
+  // Handler for adding consequences (dialogue effects)
+  const addConsequences = (optionIndex) => {
+    // Create with default first effect
+    const defaultEffect = {
+      event_type: "ModifyRelationship",
+      data: ["", 0], // Default to empty NPC ID and 0 value
+    };
+
+    onUpdate(optionIndex, {
+      consequences: [defaultEffect],
+    });
+  };
+
+  // Handler for adding a specific consequence type
+  const addConsequence = (optionIndex, eventType) => {
+    let newConsequence;
+
+    switch (eventType) {
+      case "ModifyRelationship":
+        newConsequence = {
+          event_type: "ModifyRelationship",
+          data: ["", 0], // NPC ID, relationship change value
+        };
+        break;
+      case "ChangeEmotionalState":
+        newConsequence = {
+          event_type: "ChangeEmotionalState",
+          data: "Neutral", // Default emotional state
+        };
+        break;
+      case "RevealClue":
+        newConsequence = {
+          event_type: "RevealClue",
+          data: {
+            id: `clue_${Date.now()}`,
+            description: "New clue revealed",
+            related_quest: "",
+            discovered: true,
+          },
+        };
+        break;
+      case "UnlockThought":
+        newConsequence = {
+          event_type: "UnlockThought",
+          data: "",
+        };
+        break;
+      case "ModifySkill":
+        newConsequence = {
+          event_type: "ModifySkill",
+          data: ["", 0], // Skill name, change value
+        };
+        break;
+      case "TriggerEvent":
+        newConsequence = {
+          event_type: "TriggerEvent",
+          data: "",
+        };
+        break;
+      case "ModifyQuestStatus":
+        newConsequence = {
+          event_type: "ModifyQuestStatus",
+          data: ["", "InProgress"], // Quest ID, new status
+        };
+        break;
+      case "UnlockDialogueNode":
+        newConsequence = {
+          event_type: "UnlockDialogueNode",
+          data: "",
+        };
+        break;
+      case "LockDialogueNode":
+        newConsequence = {
+          event_type: "LockDialogueNode",
+          data: "",
+        };
+        break;
+      case "StartQuest":
+        newConsequence = {
+          event_type: "StartQuest",
+          data: "", // Quest ID
+        };
+        break;
+      case "AdvanceQuest":
+        newConsequence = {
+          event_type: "AdvanceQuest",
+          data: ["", ""], // Quest ID, Stage ID
+        };
+        break;
+      case "CompleteQuestObjective":
+        newConsequence = {
+          event_type: "CompleteQuestObjective",
+          data: ["", ""], // Quest ID, Objective ID
+        };
+        break;
+      case "FailQuest":
+        newConsequence = {
+          event_type: "FailQuest",
+          data: "", // Quest ID
+        };
+        break;
+      case "AddQuestItem":
+        newConsequence = {
+          event_type: "AddQuestItem",
+          data: {
+            quest_id: "",
+            item: {
+              id: "",
+              name: "",
+              description: "",
+              effects: {},
+            },
+          },
+        };
+        break;
+      case "UnlockQuestBranch":
+        newConsequence = {
+          event_type: "UnlockQuestBranch",
+          data: ["", ""], // Quest ID, Branch ID
+        };
+        break;
+      default:
+        newConsequence = {
+          event_type: eventType,
+          data: "",
+        };
+    }
+
+    // Add new consequence to the existing array or create a new array
+    const currentConsequences = options[optionIndex].consequences || [];
+    onUpdate(optionIndex, {
+      consequences: [...currentConsequences, newConsequence],
+    });
+
+    // Close the dropdown after selecting
+    setActiveDropdown(null);
+  };
+
+  // Handler for updating a consequence
+  const updateConsequence = (
+    optionIndex,
+    consequenceIndex,
+    updatedConsequence,
+  ) => {
+    const newConsequences = [...(options[optionIndex].consequences || [])];
+    newConsequences[consequenceIndex] = updatedConsequence;
+
+    onUpdate(optionIndex, {
+      consequences: newConsequences,
+    });
+  };
+
+  // Handler for deleting a consequence
+  const deleteConsequence = (optionIndex, consequenceIndex) => {
+    const newConsequences = [...(options[optionIndex].consequences || [])];
+    newConsequences.splice(consequenceIndex, 1);
+
+    onUpdate(optionIndex, {
+      consequences: newConsequences.length > 0 ? newConsequences : null,
+    });
+  };
+
+  // Helper to get all quest stages for a specific quest
+  const getQuestStages = (questId) => {
+    if (!questId || !quests || !quests[questId] || !quests[questId].stages) {
+      return [];
+    }
+
+    return quests[questId].stages.map((stage) => ({
+      id: stage.id,
+      description: stage.description,
+    }));
+  };
+
+  // Helper to get all quest objectives for a specific quest stage
+  const getQuestObjectives = (questId, stageId) => {
+    if (!questId || !quests || !quests[questId] || !quests[questId].stages) {
+      return [];
+    }
+
+    const stage = quests[questId].stages.find((s) => s.id === stageId);
+    if (!stage || !stage.objectives) {
+      return [];
+    }
+
+    return stage.objectives.map((obj) => ({
+      id: obj.id,
+      description: obj.description,
+    }));
+  };
+
+  // Check if a consequence is quest-related
+  const isQuestConsequence = (consequence) => {
+    if (!consequence || !consequence.event_type) return false;
+
+    const questEventTypes = [
+      "StartQuest",
+      "AdvanceQuest",
+      "CompleteQuestObjective",
+      "FailQuest",
+      "AddQuestItem",
+      "UnlockQuestBranch",
+    ];
+
+    return questEventTypes.includes(consequence.event_type);
+  };
+
   if (options.length === 0) {
     return (
       <div className="text-light italic text-sm p-3 border rounded">
@@ -95,7 +395,15 @@ const OptionEditor = ({
   return (
     <div className="space-y-4">
       {options.map((option, idx) => (
-        <div key={idx} className="option-item">
+        <div
+          key={idx}
+          className={`option-item ${isQuestRelatedOption(idx) ? "quest-related" : ""}`}
+          title={
+            isQuestRelatedOption(idx)
+              ? `Related quests: ${getQuestTitles(idx)}`
+              : ""
+          }
+        >
           <div className="option-header">
             <h4 className="font-medium">Option #{idx + 1}</h4>
             <button
@@ -336,82 +644,195 @@ const OptionEditor = ({
             )}
           </div>
 
-          {/* Script Effects */}
+          {/* Consequences/Dialogue Effects */}
           <div className="mb-2">
-            {option.script_effects ? (
-              <div className="card">
-                <div className="card-header">
-                  <h5 className="card-title">Script Effects</h5>
-                  <button
-                    onClick={() => onUpdate(idx, { script_effects: null })}
-                    className="button button-sm button-danger"
-                  >
-                    Remove
-                  </button>
-                </div>
-                <div className="card-body">
-                  <textarea
-                    className="input-field font-mono"
-                    value={option.script_effects}
-                    rows={3}
-                    placeholder="Enter script commands..."
-                    onChange={(e) =>
-                      onUpdate(idx, { script_effects: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => onUpdate(idx, { script_effects: "" })}
-                className="text-yellow-500 text-sm hover:text-yellow-700"
-              >
-                + Add Script Effects
-              </button>
-            )}
-          </div>
+            <div className="flex justify-between items-center mb-2">
+              <h5 className="font-medium text-sm">
+                Dialogue Effects
+                {option.consequences && option.consequences.length > 0
+                  ? ` (${option.consequences.length})`
+                  : ""}
+              </h5>
 
-          {/* Item Rewards */}
-          <div className="mb-2">
-            {option.item_rewards ? (
-              <div className="card">
-                <div className="card-header">
-                  <h5 className="card-title">Item Rewards</h5>
+              {option.consequences && option.consequences.length > 0 ? (
+                <div className="dropdown" ref={dropdownRef}>
                   <button
-                    onClick={() => onUpdate(idx, { item_rewards: null })}
-                    className="button button-sm button-danger"
+                    className="button button-sm button-primary dropdown-toggle"
+                    onClick={() => toggleDropdown(idx)}
                   >
-                    Remove
+                    + Add Effect
                   </button>
+                  {activeDropdown === idx && (
+                    <div className="dropdown-menu dropdown-menu-wider show">
+                      {/* Standard effects */}
+                      <div className="dropdown-menu-section">
+                        <div className="dropdown-menu-title">
+                          Standard Effects
+                        </div>
+                        <button
+                          onClick={() =>
+                            addConsequence(idx, "ModifyRelationship")
+                          }
+                          className="dropdown-item"
+                        >
+                          Modify Relationship
+                        </button>
+                        <button
+                          onClick={() =>
+                            addConsequence(idx, "ChangeEmotionalState")
+                          }
+                          className="dropdown-item"
+                        >
+                          Change Emotional State
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "RevealClue")}
+                          className="dropdown-item"
+                        >
+                          Reveal Clue
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "UnlockThought")}
+                          className="dropdown-item"
+                        >
+                          Unlock Thought
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "ModifySkill")}
+                          className="dropdown-item"
+                        >
+                          Modify Skill
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "TriggerEvent")}
+                          className="dropdown-item"
+                        >
+                          Trigger Event
+                        </button>
+                      </div>
+
+                      {/* Dialogue effects */}
+                      <div className="dropdown-menu-section">
+                        <div className="dropdown-menu-title">
+                          Dialogue Effects
+                        </div>
+                        <button
+                          onClick={() =>
+                            addConsequence(idx, "UnlockDialogueNode")
+                          }
+                          className="dropdown-item"
+                        >
+                          Unlock Dialogue Node
+                        </button>
+                        <button
+                          onClick={() =>
+                            addConsequence(idx, "LockDialogueNode")
+                          }
+                          className="dropdown-item"
+                        >
+                          Lock Dialogue Node
+                        </button>
+                      </div>
+
+                      {/* Quest effects */}
+                      <div className="dropdown-menu-section">
+                        <div className="dropdown-menu-title">Quest Effects</div>
+                        <button
+                          onClick={() => addConsequence(idx, "StartQuest")}
+                          className="dropdown-item"
+                        >
+                          Start Quest
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "AdvanceQuest")}
+                          className="dropdown-item"
+                        >
+                          Advance Quest
+                        </button>
+                        <button
+                          onClick={() =>
+                            addConsequence(idx, "CompleteQuestObjective")
+                          }
+                          className="dropdown-item"
+                        >
+                          Complete Quest Objective
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "FailQuest")}
+                          className="dropdown-item"
+                        >
+                          Fail Quest
+                        </button>
+                        <button
+                          onClick={() => addConsequence(idx, "AddQuestItem")}
+                          className="dropdown-item"
+                        >
+                          Add Quest Item
+                        </button>
+                        <button
+                          onClick={() =>
+                            addConsequence(idx, "UnlockQuestBranch")
+                          }
+                          className="dropdown-item"
+                        >
+                          Unlock Quest Branch
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="card-body">
-                  <select
-                    multiple
-                    className="input-field h-20"
-                    value={option.item_rewards || []}
-                    onChange={(e) => {
-                      const selectedRewards = Array.from(
-                        e.target.selectedOptions,
-                        (option) => option.value,
-                      );
-                      onUpdate(idx, { item_rewards: selectedRewards });
-                    }}
+              ) : (
+                <button
+                  onClick={() => addConsequences(idx)}
+                  className="button button-sm button-success"
+                >
+                  + Add Effects
+                </button>
+              )}
+            </div>
+
+            {/* Display consequences */}
+            {option.consequences && option.consequences.length > 0 && (
+              <div className="consequences-list">
+                {option.consequences.map((consequence, consequenceIdx) => (
+                  <div
+                    key={consequenceIdx}
+                    className={`consequence-item ${isQuestConsequence(consequence) ? "quest-consequence" : ""}`}
                   >
-                    {availableItems.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    <div className="consequence-header">
+                      <span className="consequence-type">
+                        {consequence.event_type}
+                      </span>
+                      <button
+                        onClick={() => deleteConsequence(idx, consequenceIdx)}
+                        className="button button-xs button-danger"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="consequence-editor">
+                      <ConsequenceEditor
+                        consequence={consequence}
+                        onUpdate={(updatedConsequence) =>
+                          updateConsequence(
+                            idx,
+                            consequenceIdx,
+                            updatedConsequence,
+                          )
+                        }
+                        availableItems={availableItems}
+                        availableSkills={availableSkills}
+                        emotionalStates={emotionalStates}
+                        allNodes={allNodes}
+                        quests={quests}
+                        getQuestStages={getQuestStages}
+                        getQuestObjectives={getQuestObjectives}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <button
-                onClick={() => onUpdate(idx, { item_rewards: [] })}
-                className="text-indigo-500 text-sm hover:text-indigo-700"
-              >
-                + Add Item Rewards
-              </button>
             )}
           </div>
 

@@ -923,3 +923,308 @@ body {
     margin-bottom: 0.5rem;
   }
 }
+/* ===== Dropdown Menu ===== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  display: none;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  text-align: left;
+  list-style: none;
+  background-color: white;
+  background-clip: padding-box;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.dropdown-menu-wider {
+  min-width: 15rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown-toggle:focus + .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 1rem;
+  clear: both;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc;
+  color: var(--primary-color);
+}
+
+.dropdown-menu-section {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-menu-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.dropdown-menu-title {
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+/* ===== Consequences/Dialogue Effects ===== */
+.consequences-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.consequence-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+.consequence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(79, 70, 229, 0.1);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.consequence-type {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--primary-color);
+}
+
+.consequence-editor {
+  padding: 0.75rem;
+}
+
+/* Quest-related styling */
+.quest-related-node {
+  border-left: 3px solid #f59e0b !important; /* Gold color for quest-related nodes */
+}
+
+.quest-related-option {
+  background-color: rgba(
+    245,
+    158,
+    11,
+    0.1
+  ) !important; /* Light gold for quest-related options */
+} /* ===== Dropdown Menu ===== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  display: none;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  text-align: left;
+  list-style: none;
+  background-color: white;
+  background-clip: padding-box;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.dropdown-menu-wider {
+  min-width: 15rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown-toggle:focus + .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 1rem;
+  clear: both;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc;
+  color: var(--primary-color);
+}
+
+.dropdown-menu-section {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-menu-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.dropdown-menu-title {
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+/* Additional styles for OptionEditor with quest integration */
+
+/* Quest-related options styling */
+.option-item.quest-related {
+  border-left: 3px solid #f59e0b;
+  background-color: rgba(245, 158, 11, 0.05);
+}
+
+/* Dropdown menu for dialogue effects */
+.dropdown-menu-wider {
+  min-width: 220px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dropdown-menu-section {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-menu-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.dropdown-menu-title {
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+/* Consequences/Effects styling */
+.consequences-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.consequence-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+.consequence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(79, 70, 229, 0.1);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.consequence-type {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--primary-color);
+}
+
+.consequence-editor {
+  padding: 0.75rem;
+}
+
+/* Quest-related consequences */
+.consequence-item.quest-consequence .consequence-header {
+  background-color: rgba(245, 158, 11, 0.15);
+}
+
+.consequence-item.quest-consequence .consequence-type {
+  color: #d97706;
+}
+
+/* Node quest tags */
+.node-quest-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.node-quest-tag {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  padding: 0.125rem 0.375rem;
+  border-radius: 1rem;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+/* Quest filter in node list */
+.quest-filter {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* For highlighting quest-related dialogue nodes */
+.quest-related-node {
+  border-left: 3px solid #f59e0b !important;
+}
