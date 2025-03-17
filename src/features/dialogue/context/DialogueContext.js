@@ -115,11 +115,11 @@ export const DialogueProvider = ({ children }) => {
   // Preview state
   const [previewConversation, setPreviewConversation] = useState([]);
 
-  // Visualization state
+  // Visualisation state
   const [showNodeDetails, setShowNodeDetails] = useState(true);
   const [showSkillChecks, setShowSkillChecks] = useState(true);
   const [viewMode, setViewMode] = useState("flow"); // flow, tree, timeline
-  const [showQuestsInVisualization, setShowQuestsInVisualization] =
+  const [showQuestsInVisualisation, setShowQuestsInVisualisation] =
     useState(false);
 
   // Update the history status whenever the history manager changes
@@ -378,7 +378,7 @@ export const DialogueProvider = ({ children }) => {
     showNodeDetails,
     showSkillChecks,
     viewMode,
-    showQuestsInVisualization,
+    showQuestsInVisualisation,
 
     // State updaters
     setDialogueTrees,
@@ -400,7 +400,7 @@ export const DialogueProvider = ({ children }) => {
     setShowNodeDetails,
     setShowSkillChecks,
     setViewMode,
-    setShowQuestsInVisualization,
+    setShowQuestsInVisualisation,
 
     // Action handlers
     handleUndo,

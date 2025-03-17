@@ -9,7 +9,7 @@ const Tabs = ({
 }) => {
   const tabs = [
     { id: "editor", label: "Editor" },
-    { id: "visualization", label: "Visualization" },
+    { id: "visualisation", label: "Visualisation" },
     { id: "preview", label: "Preview", onClick: onPreviewStart },
     { id: "yaml", label: "YAML", onClick: onExportYAML },
     { id: "json", label: "JSON", onClick: onExportJSON },

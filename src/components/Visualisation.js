@@ -13,11 +13,11 @@ const Visualisation = ({
 }) => {
   const svgRef = useRef(null);
 
-  // D3 Visualization Effect
+  // D3 Visualisation Effect
   useEffect(() => {
     if (!svgRef.current) return;
 
-    // Clear previous visualization
+    // Clear previous visualisation
     d3.select(svgRef.current).selectAll("*").remove();
 
     // Create graph data structure
@@ -93,7 +93,7 @@ const Visualisation = ({
       .attr("width", width)
       .attr("height", height);
 
-    // Create a group for the entire visualization
+    // Create a group for the entire visualisation
     const g = svg.append("g");
 
     // Create a zoom behavior
@@ -157,7 +157,7 @@ const Visualisation = ({
       .domain(emotionalStates)
       .range(d3.schemeCategory10);
 
-    // Choose visualization based on viewMode
+    // Choose visualisation based on viewMode
     if (viewMode === "flow") {
       renderFlowChart(g, nodes, links, colorScale);
 
@@ -707,8 +707,8 @@ const Visualisation = ({
   ]);
 
   return (
-    <div className="visualization-container">
-      <div className="visualization-toolbar">
+    <div className="visualisation-container">
+      <div className="visualisation-toolbar">
         <h2 className="panel-title">Dialogue Visualisation</h2>
         <div className="flex items-center gap-4">
           <label className="flex items-center text-sm">
@@ -736,10 +736,10 @@ const Visualisation = ({
         </div>
       </div>
 
-      <div className="visualization-content">
+      <div className="visualisation-content">
         <svg
           ref={svgRef}
-          className="visualization-svg"
+          className="visualisation-svg"
           width="100%"
           height="100%"
         ></svg>

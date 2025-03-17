@@ -452,8 +452,8 @@ body {
   margin-bottom: 0.75rem;
 }
 
-/* ===== Visualization ===== */
-.visualization-container {
+/* ===== Visualisation ===== */
+.visualisation-container {
   background-color: white;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -463,7 +463,7 @@ body {
   flex-direction: column;
 }
 
-.visualization-toolbar {
+.visualisation-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -472,13 +472,13 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
-.visualization-content {
+.visualisation-content {
   flex: 1;
   overflow: hidden;
   background-color: #f8fafc;
 }
 
-.visualization-svg {
+.visualisation-svg {
   width: 100%;
   height: 100%;
 }
@@ -789,7 +789,7 @@ body {
     max-height: 500px;
   }
 
-  .visualization-container,
+  .visualisation-container,
   .preview-container,
   .export-container,
   .settings-container {
