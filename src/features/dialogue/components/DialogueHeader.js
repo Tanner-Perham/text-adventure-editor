@@ -30,7 +30,7 @@ const DialogueHeader = () => {
   const tabs = [
     { id: "editor", label: "Dialogue Editor" },
     { id: "quests", label: "Quest Editor" },
-    { id: "visualization", label: "Visualization" },
+    { id: "visualisation", label: "Visualisation" },
     { id: "preview", label: "Preview" },
     { id: "yaml", label: "YAML" },
     { id: "json", label: "JSON" },

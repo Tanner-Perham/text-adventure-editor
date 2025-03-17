@@ -4,6 +4,7 @@ import NodeListPanel from "./NodeListPanel";
 import NodeEditorPanel from "./NodeEditorPanel";
 import SaveReminder from "../../../components/SaveReminder";
 import Visualisation from "../../../components/Visualisation";
+import { VisualisationContainer } from "../../visualisation";
 import Preview from "../../../components/Preview";
 import { QuestEditorContainer } from "../../quests";
 
@@ -27,8 +28,8 @@ const DialogueEditorLayout = () => {
     setViewMode,
     showNodeDetails,
     setShowNodeDetails,
-    showQuestsInVisualization,
-    setShowQuestsInVisualization,
+    showQuestsInVisualisation,
+    setShowQuestsInVisualisation,
     previewConversation,
     setPreviewConversation,
     startPreview,
@@ -72,48 +73,21 @@ const DialogueEditorLayout = () => {
           />
         );
 
-      case "visualization":
+      case "visualisation":
         return (
-          <div className="visualization-container">
-            <div className="visualization-toolbar">
-              <h2 className="panel-title">Dialogue Visualisation</h2>
-              <div className="visualization-controls">
-                <label className="flex items-center text-sm">
-                  <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={showQuestsInVisualization}
-                    onChange={(e) =>
-                      setShowQuestsInVisualization(e.target.checked)
-                    }
-                  />
-                  Show Quest Relationships
-                </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">View Mode:</span>
-                  <select
-                    className="select-field"
-                    value={viewMode}
-                    onChange={(e) => setViewMode(e.target.value)}
-                  >
-                    <option value="flow">Flow Chart</option>
-                    <option value="tree">Tree</option>
-                    <option value="timeline">Timeline</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="visualization-content">
-              <Visualisation
+          <div className="visualisation-container">
+            <div className="visualisation-content">
+              <VisualisationContainer
                 dialogueTrees={dialogueTrees}
                 currentNode={currentNode}
                 emotionalStates={emotionalStates}
                 viewMode={viewMode}
                 showNodeDetails={showNodeDetails}
-                showQuestsInVisualization={showQuestsInVisualization}
+                showQuestsInVisualisation={showQuestsInVisualisation}
                 quests={quests}
                 onViewModeChange={setViewMode}
                 onShowNodeDetailsChange={setShowNodeDetails}
+                onShowQuestsInVisualisationChange={setShowQuestsInVisualisation}
                 onNodeSelect={handleNodeSelect}
               />
             </div>

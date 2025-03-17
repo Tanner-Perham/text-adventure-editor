@@ -186,7 +186,7 @@ export const createFlowChart = (
  * @param {Array} emotionalStates - Array of possible emotional states
  * @param {Function} onNodeSelect - Callback when a node is selected
  */
-export const createTimelineVisualization = (
+export const createTimelineVisualisation = (
   svgElement,
   dialogueTrees,
   startNodeId,
@@ -417,7 +417,7 @@ export const createTimelineVisualization = (
  * @param {Array} emotionalStates - Array of possible emotional states
  * @param {Function} onNodeSelect - Callback when a node is selected
  */
-export const createTreeVisualization = (
+export const createTreeVisualisation = (
   svgElement,
   dialogueTrees,
   rootNodeId,
