@@ -2,6 +2,7 @@ import React from "react";
 import { useDialogue } from "../context/DialogueContext";
 import Panel from "./common/Panel";
 import NodeList from "../../../components/NodeList";
+import { importFromYAML } from "../../../utils/yamlImporter";
 
 /**
  * Panel for displaying and managing the list of dialogue nodes
@@ -53,13 +54,23 @@ const NodeListPanel = () => {
   };
 
   const handleImportYAML = (event) => {
-    // This would need to use the importFromYAML utility
     if (!event.target.files || !event.target.files[0]) return;
 
     const file = event.target.files[0];
 
-    // Import logic can be implemented here once we have the import function
-    alert("YAML import functionality is in progress");
+    importFromYAML(file)
+      .then((parsedData) => {
+        setDialogueTrees(parsedData);
+        alert("Dialogue tree imported successfully!");
+
+        // Set current node to first node in the tree
+        if (Object.keys(parsedData).length > 0) {
+          setCurrentNode(Object.keys(parsedData)[0]);
+        }
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   return (
