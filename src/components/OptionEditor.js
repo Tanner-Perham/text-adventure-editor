@@ -654,141 +654,128 @@ const OptionEditor = ({
                   : ""}
               </h5>
 
-              {option.consequences && option.consequences.length > 0 ? (
-                <div className="dropdown" ref={dropdownRef}>
-                  <button
-                    className="button button-sm button-primary dropdown-toggle"
-                    onClick={() => toggleDropdown(idx)}
-                  >
-                    + Add Effect
-                  </button>
-                  {activeDropdown === idx && (
-                    <div className="dropdown-menu dropdown-menu-wider show">
-                      {/* Standard effects */}
-                      <div className="dropdown-menu-section">
-                        <div className="dropdown-menu-title">
-                          Standard Effects
-                        </div>
-                        <button
-                          onClick={() =>
-                            addConsequence(idx, "ModifyRelationship")
-                          }
-                          className="dropdown-item"
-                        >
-                          Modify Relationship
-                        </button>
-                        <button
-                          onClick={() =>
-                            addConsequence(idx, "ChangeEmotionalState")
-                          }
-                          className="dropdown-item"
-                        >
-                          Change Emotional State
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "RevealClue")}
-                          className="dropdown-item"
-                        >
-                          Reveal Clue
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "UnlockThought")}
-                          className="dropdown-item"
-                        >
-                          Unlock Thought
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "ModifySkill")}
-                          className="dropdown-item"
-                        >
-                          Modify Skill
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "TriggerEvent")}
-                          className="dropdown-item"
-                        >
-                          Trigger Event
-                        </button>
-                      </div>
-
-                      {/* Dialogue effects */}
-                      <div className="dropdown-menu-section">
-                        <div className="dropdown-menu-title">
-                          Dialogue Effects
-                        </div>
-                        <button
-                          onClick={() =>
-                            addConsequence(idx, "UnlockDialogueNode")
-                          }
-                          className="dropdown-item"
-                        >
-                          Unlock Dialogue Node
-                        </button>
-                        <button
-                          onClick={() =>
-                            addConsequence(idx, "LockDialogueNode")
-                          }
-                          className="dropdown-item"
-                        >
-                          Lock Dialogue Node
-                        </button>
-                      </div>
-
-                      {/* Quest effects */}
-                      <div className="dropdown-menu-section">
-                        <div className="dropdown-menu-title">Quest Effects</div>
-                        <button
-                          onClick={() => addConsequence(idx, "StartQuest")}
-                          className="dropdown-item"
-                        >
-                          Start Quest
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "AdvanceQuest")}
-                          className="dropdown-item"
-                        >
-                          Advance Quest
-                        </button>
-                        <button
-                          onClick={() =>
-                            addConsequence(idx, "CompleteQuestObjective")
-                          }
-                          className="dropdown-item"
-                        >
-                          Complete Quest Objective
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "FailQuest")}
-                          className="dropdown-item"
-                        >
-                          Fail Quest
-                        </button>
-                        <button
-                          onClick={() => addConsequence(idx, "AddQuestItem")}
-                          className="dropdown-item"
-                        >
-                          Add Quest Item
-                        </button>
-                        <button
-                          onClick={() =>
-                            addConsequence(idx, "UnlockQuestBranch")
-                          }
-                          className="dropdown-item"
-                        >
-                          Unlock Quest Branch
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
+              <div className="dropdown" ref={dropdownRef}>
                 <button
-                  onClick={() => addConsequences(idx)}
-                  className="button button-sm button-success"
+                  className="button button-sm button-primary dropdown-toggle"
+                  onClick={() => toggleDropdown(idx)}
                 >
-                  + Add Effects
+                  + Add Effect
                 </button>
-              )}
+                {activeDropdown === idx && (
+                  <div className="dropdown-menu dropdown-menu-wider show">
+                    {/* Standard effects */}
+                    <div className="dropdown-menu-section">
+                      <div className="dropdown-menu-title">
+                        Standard Effects
+                      </div>
+                      <button
+                        onClick={() =>
+                          addConsequence(idx, "ModifyRelationship")
+                        }
+                        className="dropdown-item"
+                      >
+                        Modify Relationship
+                      </button>
+                      <button
+                        onClick={() =>
+                          addConsequence(idx, "ChangeEmotionalState")
+                        }
+                        className="dropdown-item"
+                      >
+                        Change Emotional State
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "RevealClue")}
+                        className="dropdown-item"
+                      >
+                        Reveal Clue
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "UnlockThought")}
+                        className="dropdown-item"
+                      >
+                        Unlock Thought
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "ModifySkill")}
+                        className="dropdown-item"
+                      >
+                        Modify Skill
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "TriggerEvent")}
+                        className="dropdown-item"
+                      >
+                        Trigger Event
+                      </button>
+                    </div>
+
+                    {/* Dialogue effects */}
+                    <div className="dropdown-menu-section">
+                      <div className="dropdown-menu-title">
+                        Dialogue Effects
+                      </div>
+                      <button
+                        onClick={() =>
+                          addConsequence(idx, "UnlockDialogueNode")
+                        }
+                        className="dropdown-item"
+                      >
+                        Unlock Dialogue Node
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "LockDialogueNode")}
+                        className="dropdown-item"
+                      >
+                        Lock Dialogue Node
+                      </button>
+                    </div>
+
+                    {/* Quest effects */}
+                    <div className="dropdown-menu-section">
+                      <div className="dropdown-menu-title">Quest Effects</div>
+                      <button
+                        onClick={() => addConsequence(idx, "StartQuest")}
+                        className="dropdown-item"
+                      >
+                        Start Quest
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "AdvanceQuest")}
+                        className="dropdown-item"
+                      >
+                        Advance Quest
+                      </button>
+                      <button
+                        onClick={() =>
+                          addConsequence(idx, "CompleteQuestObjective")
+                        }
+                        className="dropdown-item"
+                      >
+                        Complete Quest Objective
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "FailQuest")}
+                        className="dropdown-item"
+                      >
+                        Fail Quest
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "AddQuestItem")}
+                        className="dropdown-item"
+                      >
+                        Add Quest Item
+                      </button>
+                      <button
+                        onClick={() => addConsequence(idx, "UnlockQuestBranch")}
+                        className="dropdown-item"
+                      >
+                        Unlock Quest Branch
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Display consequences */}
